@@ -1,11 +1,33 @@
+/*
+ *      学术与工程实践I（计算机）
+ *      药品供销管理系统
+ *      Environment: MacOS 10.15 / CentOS 7
+ *      Language: C++
+ *      Version: -std=c++ 11 or Later
+ *      Author: 苏靖博(BOBLT Sudo)
+ *      Date:
+ */
+
 #include <iostream>
-#include <cstdio>
 #include <list>
 #include <unistd.h>
 #include <fstream>
 #include <utility>
 #include <ctime>
 using namespace std;
+/*      Attention: "NOLINT" is used to prevent errors on CLion    */
+
+// Loading Bar
+void progressBar()
+{
+    cout << "* Loading" << '\n';
+    sleep(2);
+    cout << "###############    "
+         << "(1/2)" << '\n';
+    sleep(1);
+    cout << "###############    "
+         << "(2/2)";
+}
 
 class Medicine
 {
@@ -16,48 +38,20 @@ private:
         string name;
         string species;
         string manufacture;
-        int price;
+        string price;
         string indate;
         string attentionMatters;
-        int stock;
-
-        explicit medicineMessage(int prc = 0, int stk = 0) : price(prc), stock(stk) {}
+        string stock;
     };
 
-    list<medicineMessage> medicineList;
-    string fileBasePath = "./medicine_base.dat";
+    // 文件IO使用
+    list<medicineMessage> ioMedicineList;
+    string fileBasePath = "medicine_base.dat";
 
 public:
-    void logMedicineMessageWrite()
-    {
-        // Open by emptying the source file
-        ofstream ofstr(fileBasePath, ios_base::out | ios_base::trunc);
-        // Fail to open file
-        if (!ofstr.is_open())
-        {
-            cout << "文件打开失败" << endl;
-            return;
-        }
-        // File opened successfully
-        // Copy message from List to the file (Write)
-        for (const auto &item : medicineList)
-        {
-            ofstr << endl
-                  << item.number
-                  << item.name
-                  << item.species
-                  << item.manufacture
-                  << item.price
-                  << item.indate
-                  << item.attentionMatters
-                  << item.stock;
-        }
-        // Close file
-        ofstr.close();
-    }
-
+    // First!
     // Put file content into List (Read)
-    void logMedicineMessageRead()
+    Medicine()
     {
         ifstream ifstr(fileBasePath, ios_base::in);
         // Just in case
@@ -71,11 +65,17 @@ public:
             }
             tmp.close();
         }
-        // Command "clear" in Linux / OSX
-        // On Windows can use:
+
+        system("clear");
         // system("cls");
 
+        // Open successfully
         ifstr.open(fileBasePath, ios_base::in);
+
+        cout << "读取中 *" << endl;
+        sleep(1);
+        progressBar();
+        cout << endl;
 
         medicineMessage msg;
         char ch[30];
@@ -93,21 +93,145 @@ public:
             ifstr.getline(ch, sizeof(ch));
             msg.manufacture = ch;
             ifstr.getline(ch, sizeof(ch));
-            msg.price = stoi(ch);
+            msg.price = ch;
             ifstr.getline(ch, sizeof(ch));
             msg.indate = ch;
             ifstr.getline(ch, sizeof(ch));
             msg.attentionMatters = ch;
             ifstr.getline(ch, sizeof(ch));
-            msg.stock = stoi(ch);
+            msg.stock = ch;
 
-            medicineList.push_back(msg);
+            ioMedicineList.push_back(msg);
         }
+        ifstr.close();
+        cout << "文件读取完成" << endl;
     }
 
+    bool logMedicineMessage()
+    {
+        medicineMessage message;
+        cout << endl
+             << "========= 药品信息录入 =========" << endl;
+        cout << "@@@ 若想退出录入请输入\'q\' @@@" << endl
+             << endl;
+    L1:
+        cout << "请输入药品编号";
+        cin >> message.number;
+        if (message.number == "q")
+        {
+            return false;
+        }
+        for (auto &item : ioMedicineList)
+        {
+            if (item.number == message.number)
+            {
+                cout << endl
+                     << "药品重复录入，请检查录入药品的编号！" << endl
+                     << endl;
+                goto L1;
+            }
+        }
+
+        // Log message until return false
+        cout << endl;
+        cout << "请输入药品名称：";
+        cin >> message.name;
+        if (message.name == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品种类：";
+        cin >> message.species;
+        if (message.species == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品生产厂家：";
+        cin >> message.manufacture;
+        if (message.manufacture == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品价格：";
+        cin >> message.price;
+        if (message.price == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品有效日期：";
+        cin >> message.indate;
+        if (message.indate == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品注意事项：";
+        cin >> message.attentionMatters;
+        if (message.attentionMatters == "q")
+        {
+            return false;
+        }
+        cout << "请输入药品库存量（初始为0）：";
+        cin >> message.stock;
+        if (message.stock == "q")
+        {
+            return false;
+        }
+        cout << endl;
+
+        ioMedicineList.push_back(message);
+
+        ofstream ofstr(fileBasePath, ios_base::app);
+        ofstr << endl
+              << message.number << endl
+              << message.name << endl
+              << message.species << endl
+              << message.manufacture << endl
+              << message.price << endl
+              << message.indate << endl
+              << message.attentionMatters << endl
+              << message.stock;
+
+        ofstr.close();
+        return true;
+    }
+
+    static double stringToDouble(const string &str)
+    {
+        double res = 0;
+        int size = str.size() - 1;
+        int i = 0;
+        while (str[i] != '.' && i < size)
+        {
+            res = res * 10 + str[i] - '0';
+            ++i;
+        }
+        // if(i < size) str[i] = '.'
+        double tmp = 0;
+        if (i < size)
+        {
+            for (int j = size - 1; j > i; --j)
+            {
+                tmp = (tmp + static_cast<double>(str[j] - '0')) / 10;
+            }
+        }
+
+        return (res + tmp);
+    }
+    static int stringToInteger(const string &str)
+    {
+        int res = 0;
+        int size = str.size() - 1;
+        for (int i = 0; i < size; ++i)
+        {
+            res = res * 10 + str[i] - '0';
+        }
+        return res;
+    }
+
+    // May can not be used
     bool listSearch(const string &Name, const string &Num)
     {
-        for (const auto &item : medicineList)
+        for (const auto &item : ioMedicineList) /* NOLINT */
         {
             if (item.name == Name && item.number == Num)
             {
@@ -116,261 +240,273 @@ public:
         }
         return false;
     }
+
     // Match the "price" of medicine
-    int perPrice(const string &medicineName)
+    double perPrice(const string &medicineName)
     {
-        int perprice;
-        for (const auto &item : medicineList)
+        double per_price;
+        for (const auto &item : ioMedicineList)
         {
             if (item.name == medicineName)
             {
-                perprice = item.price;
+                per_price = stringToDouble(item.price);
             }
         }
-        return perprice;
+        return per_price;
     }
 
     // TODO:删改的函数接口，注意变更后的刷新
     friend void modify();
 
 private:
-    string fileDealPath = "./medicine_deal.dat";
+    string fileDealPath = "medicine_deal.dat";
     struct intoStorageMessage
     {
         string medicineName;
         string medicineNum;
-        double intoStoragePerPrice = 0;
-        int intoStorageNum = 0;
-        double intoStoragePrice = 0; // intoStoragePrice = intoStoragePerPrice * intoStorageNum
+        string intoStoragePerPrice;
+        string intoStorageNum;
+        string intoStoragePrice; // intoStoragePrice = intoStoragePerPrice * intoStorageNum
         string intoStorageTime;
         string intoStoragePerson;
         string intoStorageType;
     };
-    list<intoStorageMessage> intoStorageList;
 
 public:
-    void intoStorageMedicineMessageWrite()
+    bool intoStorageMedicine()
     {
-        ofstream ofstr(fileDealPath, ios_base::out | ios_base::trunc);
-        if (!ofstr.is_open())
+        intoStorageMessage iSM;
+        cout << "========= 药品入库 =========" << endl;
+        cout << "@@@ 若想要退出请输入\'q\' @@@" << endl
+             << endl;
+    L1:
+        cout << "请输入入库药品编号：";
+        cin >> iSM.medicineNum;
+        if (iSM.medicineNum == "q")
         {
-            cout << "文件打开失败" << endl;
-            return;
+            return false;
         }
-
-        for (const auto &item : intoStorageList)
+        bool flag = true;
+        for (auto &item : ioMedicineList)
         {
-            ofstr << endl
-                  << item.medicineName
-                  << item.medicineNum
-                  << item.intoStoragePerPrice
-                  << item.intoStorageNum
-                  << item.intoStoragePrice
-                  << item.intoStorageTime
-                  << item.intoStoragePerson
-                  << item.intoStorageType;
-        }
-        // Close file
-        ofstr.close();
-    }
-
-    void intoStorage()
-    {
-        string medicine_Name;
-        string medicine_Num;
-        int intoStorage_Num;
-        string intoStorage_Person;
-
-        cout << "请输入「入库药品信息」：" << endl;
-        cout << "药品名称：";
-        cin >> medicine_Name;
-        cout << endl;
-        cout << "药品编号：";
-        cin >> medicine_Num;
-        cout << endl;
-
-        if (!listSearch(medicine_Name, medicine_Num))
-        {
-            cout << "无此药品信息！" << endl;
-        }
-        else
-        {
-            cout << "请输入药品入库数量：";
-            cin >> intoStorage_Num;
-            cout << endl;
-            cout << "请输入入库人员姓名：";
-            cin >> intoStorage_Person;
-            cout << endl;
-            // 这里medicine_Name是对应药品名称，medicine_Num对应了药品编号，intoStorage_Num代表入库数量
-            struct intoStorageMessage tmp;
-            tmp.medicineName = medicine_Name;
-            tmp.medicineNum = medicine_Num;
-            tmp.intoStoragePerPrice = perPrice(medicine_Name);
-            tmp.intoStorageNum = intoStorage_Num;
-            tmp.intoStoragePrice = perPrice(medicine_Name) * intoStorage_Num;
-            time_t now = time(nullptr);
-            string dt = ctime(&now);
-            tmp.intoStorageTime = dt;
-            tmp.intoStoragePerson = intoStorage_Person;
-            tmp.intoStorageType = "采购";
-
-            intoStorageList.push_back(tmp);
-
-            // Refresh the base stock
-            for (auto item : medicineList)
+            // Find match
+            if (item.number == iSM.medicineNum)
             {
-                if (item.name == medicine_Name)
-                {
-                    item.stock += intoStorage_Num;
-                    logMedicineMessageWrite();
-                    break;
-                }
+                flag = false;
+                break;
             }
         }
-    }
+        if (flag)
+        {
+            cout << "无药品信息，请重新输入" << endl;
+            goto L1;
+        }
+        // TODO: 判断一下这里是否需要else?
+        cout << "请输入入库药品名称：";
+        cin >> iSM.medicineName;
+        if (iSM.medicineName == "q")
+        {
+            return false;
+        }
+        cout << "请输入入库药品单价：";
+        cin >> iSM.intoStoragePerPrice;
+        if (iSM.intoStoragePerPrice == "q")
+        {
+            return false;
+        }
+        cout << "请输入入库药品数量：";
+        cin >> iSM.intoStorageNum;
+        if (iSM.intoStorageNum == "q")
+        {
+            return false;
+        }
+        int perPrice = stringToInteger(iSM.intoStoragePerPrice);
+        int intoNum = stringToInteger(iSM.intoStorageNum);
+        iSM.intoStoragePrice = to_string(perPrice * intoNum);
+        cout << "入库药品金额：" << iSM.intoStoragePrice << endl;
 
-    // TODO:这里需要获取单价库存等药品信息，然后分别更新维护两个文件
+        time_t now = time(nullptr);
+        string dt = ctime(&now);
+        iSM.intoStorageTime = dt;
+        cout << "药品入库时间：" << iSM.intoStorageTime << endl;
+
+        cout << "请输入入库员姓名：";
+        cin >> iSM.intoStoragePerson;
+        if (iSM.intoStoragePerson == "q")
+        {
+            return false;
+        }
+        cout << "交易类型：采购" << endl;
+        iSM.intoStorageType = "采购";
+        if (iSM.intoStorageType == "q")
+        {
+            return false;
+        }
+
+        // Refresh ioMedicineList.stock
+        for (auto &item : ioMedicineList)
+        {
+            if (item.number == iSM.medicineNum)
+            {
+                int Prc = stringToInteger(item.stock);
+                Prc += intoNum;
+                item.stock = to_string(Prc);
+            }
+        }
+
+        // Write into file
+
+        ofstream ofstr(fileDealPath, ios_base::app);
+        ofstr << endl
+              << iSM.medicineNum << endl
+              << iSM.medicineName << endl
+              << iSM.intoStoragePerPrice << endl
+              << iSM.intoStorageNum << endl
+              << iSM.intoStoragePrice << endl
+              << iSM.intoStorageTime << endl
+              << iSM.intoStoragePerson << endl
+              << iSM.intoStorageType;
+
+        ofstr.close();
+        return true;
+    }
 
 private:
     struct outStockMessage
     {
         string medicineName;
         string medicineNum;
-        double outStockPerPrice = 0;
-        int outStockNum = 0;
-        double outStockPrice = 0; // outStockPrice = outStockPerPrice * outStockNum
+        string outStockPerPrice;
+        string outStockNum;
+        string outStockPrice; // outStockPrice = outStockPerPrice * outStockNum
         string outStockTime;
         string outStockPerson;
         string outStockType;
     };
-    list<outStockMessage> outStockList;
 
 public:
-    void outStockMedicineMessageWrite()
+    bool outStockMedicine()
     {
-        ofstream ofstr(fileDealPath, ios_base::out | ios_base::trunc);
-        if (!ofstr.is_open())
+        outStockMessage oSM;
+        cout << "========= 药品销售 =========" << endl;
+        cout << "@@@ 如果想要退出输入，请输入\'q\' @@@" << endl;
+    L2:
+        cout << "请输入销售药品编号：";
+        cin >> oSM.medicineNum;
+        bool flag = true;
+        int stockNum = 0;
+        for (auto &item : ioMedicineList)
         {
-            cout << "文件打开失败" << endl;
-            return;
+            if (item.number == oSM.medicineNum)
+            {
+                stockNum = stringToInteger(item.stock);
+                flag = false;
+                break;
+            }
         }
-
-        for (const auto &item : outStockList)
+        if (flag)
         {
-            ofstr << endl
-                  << item.medicineName
-                  << item.medicineNum
-                  << item.outStockPerPrice
-                  << item.outStockNum
-                  << item.outStockPrice
-                  << item.outStockTime
-                  << item.outStockPerson
-                  << item.outStockType;
+            cout << "无药品信息，请重新输入" << endl;
+            goto L2;
         }
-        // Close file
-        ofstr.close();
-    }
-
-    void outStock()
-    {
-        string medicine_Name;
-        string medicine_Num;
-        // 这里medicine_Name是对应药品名称，medicine_Num对应了药品编号，outStock_Num代表入库数量
-        int outStock_Num;
-        string outStock_Person;
-
-        cout << "请输入「购买药品信息」：" << endl;
-        cout << "药品名称：";
-        cin >> medicine_Name;
-        cout << endl;
-        cout << "药品编号：";
-        cin >> medicine_Num;
-        cout << endl;
-
-        if (!listSearch(medicine_Name, medicine_Num))
+        // flag == false
+        cout << "请输入购买数量：";
+        cin >> oSM.outStockNum;
+        // If it is more than stock?
+        int outNum = stringToInteger(oSM.outStockNum);
+        if (outNum > stockNum)
         {
-            cout << "无此药品信息" << endl;
-            // TODO:看一下这里是否有必要return
-            return;
+            cout << "库存不足，请重新输入" << endl;
+            goto L2;
         }
         else
         {
-            cout << "请输入想要购买的数量：";
-            cin >> outStock_Num;
-            cout << endl;
 
-            // Compare outStockNumber with baseStockNumber
-            for (const auto &item : medicineList)
+            cout << "销售药品编号：" << oSM.medicineNum << endl;
+
+            cout << "请输入销售药品名称：";
+            cin >> oSM.medicineName;
+            if (oSM.medicineName == "q")
             {
-                if (item.name == medicine_Name && item.number == medicine_Num)
-                {
-                    if (item.stock >= outStock_Num)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        cout << "库存不足，请重新输入信息" << endl;
-                        // TODO:看一下有无比return更好的解决方法
-                        return;
-                    }
-                }
+                return false;
             }
+            cout << "请输入交易单价：";
+            cin >> oSM.outStockPerPrice;
+            if (oSM.outStockPerPrice == "q")
+            {
+                return false;
+            }
+            cout << "交易数量：" << outNum << endl;
+            oSM.outStockNum = to_string(outNum);
 
-            cout << "请输入购买者姓名：";
-            cin >> outStock_Person;
-            cout << endl;
+            cout << "交易金额：" << stringToInteger(oSM.outStockPerPrice) * outNum << endl;
+            oSM.outStockPrice = to_string(stringToInteger(oSM.outStockPerPrice) * outNum);
 
-            struct outStockMessage tmp;
-            tmp.medicineName = medicine_Name;
-            tmp.medicineNum = medicine_Num;
-            tmp.outStockPerPrice = perPrice(medicine_Name);
-            tmp.outStockNum = outStock_Num;
-            tmp.outStockPrice = perPrice(medicine_Name) * outStock_Num;
             time_t now = time(nullptr);
             string dt = ctime(&now);
-            tmp.outStockTime = dt;
-            tmp.outStockPerson = outStock_Person;
-            tmp.outStockType = "销售";
+            oSM.outStockTime = dt;
+            cout << "交易时间：" << dt << endl;
 
-            outStockList.push_back(tmp);
-
-            // Refresh the base stock
-            for (auto item : medicineList)
+            cout << "请输入购买者姓名：";
+            cin >> oSM.outStockPerson;
+            if (oSM.outStockPerson == "q")
             {
-                if (item.name == medicine_Name && item.number == medicine_Num)
-                {
-                    item.stock -= outStock_Num;
-                    logMedicineMessageWrite();
-                    break;
-                }
+                return false;
             }
+
+            oSM.outStockType = "销售";
+            cout << "交易类型："
+                 << "销售" << endl;
+
+            ofstream ofstr(fileDealPath, ios_base::app);
+            ofstr << endl
+                  << oSM.medicineName << endl
+                  << oSM.medicineNum << endl
+                  << oSM.outStockPerPrice << endl
+                  << oSM.outStockNum << endl
+                  << oSM.outStockPrice << endl
+                  << oSM.outStockTime << endl
+                  << oSM.outStockPerson << endl
+                  << oSM.outStockType;
+
+            ofstr.close();
+            return true;
         }
+    }
+
+    // Func.6 Output all messages
+    void outputAllMessages()
+    {
+        // Output medicine basic messages
+        cout << "药品的基本信息：" << endl;
+        for (auto &item : ioMedicineList)
+        {
+            cout << "药品编号：" << item.number << endl;
+            cout << "药品名称：" << item.name << endl;
+            cout << "药品种类：" << item.species << endl;
+            cout << "生产厂家：" << item.manufacture << endl;
+            cout << "药品价格：" << item.price << endl;
+            cout << "药品有效期：" << item.indate << endl;
+            cout << "药品注意事项：" << item.attentionMatters << endl;
+            cout << "药品库存量：" << item.stock << endl;
+        }
+        cout << endl
+             << "药品交易信息：" << endl;
     }
 };
 
-// Modify or delete the basic information of medicine
+// Clarify a Medicine Class
+Medicine medicine; /* NOLINT */
+// Func.5 Modify or delete the basic information of medicine
 void modify()
 {
-}
-
-// Loading Bar
-void progressBar()
-{
-    cout << "* Loading" << '\n';
-    sleep(2);
-    cout << "###############    "
-         << "(1/2)" << '\n';
-    sleep(1);
-    cout << "###############    "
-         << "(2/2)";
 }
 
 // Set and reset the password
 string password;
 bool pwd = false;
 bool flag = true;
-const static string root = "20105050110";
+const string root = "20105050110"; /* NOLINT */
 void login()
 {
     if (!pwd)
@@ -384,10 +520,11 @@ void login()
     {
         // The password has been set
         cout << endl
-             << "##### 按 l 以输入密码登录系统 ##### 按 r 以重设密码 #####" << endl;
+             << "##### 按「l」以输入密码登录系统 ##### 按「r」以重设密码 #####" << endl;
         char ch;
-        ch = getchar();
-        ch = getchar();
+        getchar();      // Get the top '\n'
+        ch = getchar(); /* NOLINT */
+        getchar();      // Get the input '\n'
         switch (ch)
         {
         case 'l':
@@ -403,11 +540,12 @@ void login()
                 cout << endl;
                 sleep(1);
                 cout << endl;
-                cout << "@@@ 欢迎使用 @@@" << endl
+                cout << "@@@@@@ 欢 迎 使 用 @@@@@@" << endl
                      << endl;
                 flag = false;
                 sleep(1);
                 system("clear");
+                //                  system("cls");
             }
             else
             {
@@ -427,7 +565,7 @@ void login()
             if (tmp == root)
             {
                 sleep(1);
-                cout << "===== Admin =====" << endl;
+                cout << "====== Admin ======" << endl;
                 sleep(1);
                 cout << "尊敬的管理员欢迎您！" << endl;
                 sleep(1);
@@ -484,19 +622,19 @@ void Hint()
 
 int main()
 {
-    Medicine medicine;
+
     Hint();
 
     if (!pwd)
     {
         cout << "请先选1设置密码：";
         char ch;
-        ch = getchar();
-        getchar();
+        ch = getchar(); /* NOLINT */
+        getchar();      /* NOLINT */
         while (ch != '1')
         {
             cout << "请先选1设置密码！";
-            ch = getchar();
+            ch = getchar(); /* NOLINT */
             getchar();
         }
         while (flag)
@@ -508,12 +646,12 @@ int main()
     {
         cout << "请先选1登录系统：";
         char ch;
-        ch = getchar();
+        ch = getchar(); /* NOLINT */
         getchar();
         while (ch != '1')
         {
             cout << "请先选1登录系统！";
-            ch = getchar();
+            ch = getchar(); /* NOLINT */
             getchar();
         }
         while (flag)
@@ -528,8 +666,8 @@ int main()
             Hint();
             cout << "请输入您的需求：";
             char ch;
-            getchar();
-            ch = getchar();
+            ch = getchar(); /* NOLINT */
+            ch = getchar(); /* NOLINT */
             switch (ch)
             {
             case '1':
@@ -542,7 +680,7 @@ int main()
                 if (tmp == root)
                 {
                     sleep(1);
-                    cout << "===== Admin =====" << endl;
+                    cout << "====== Admin ======" << endl;
                     sleep(1);
                     cout << "尊敬的管理员欢迎您！" << endl;
                     sleep(1);
@@ -558,6 +696,7 @@ int main()
                          << endl;
 
                     system("clear");
+                    //                      system("cls");
                 }
                 else
                 {
@@ -567,14 +706,22 @@ int main()
                 break;
             }
             case '2':
-                medicine.logMedicineMessageRead();
-                break;
+            {
+                {
+
+                    break;
+                }
+            }
             case '3':
-                medicine.intoStorage();
+            {
+
                 break;
+            }
             case '4':
-                medicine.outStock();
+            {
+
                 break;
+            }
             case '5':
                 modify();
                 break;
