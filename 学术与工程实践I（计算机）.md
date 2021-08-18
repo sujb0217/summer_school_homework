@@ -8,7 +8,7 @@
 2. 录入药品基本信息✅
 3. 药品的入库管理✅
 4. 药品的销售管理✅
-5. 修改药品基本信息（包括增加、删除功能）2⃣️
+5. 修改药品基本信息（包括增加、删除功能）✅
 6. 输出全部药品基本信息、药品交易信息 ✅
 7. 查询管理
 8. 统计管理
@@ -103,25 +103,7 @@
 
 Ps. 在完成所规定的基本功能基础上，尽量开拓思路，增加新思想、新举措，将有一定的加分。比如：操作等待时有进度条；显示系统时间、使用系统日期、统计对比时的柱状图、折线图 ……
 
-### 流程图
+### 
 
-### 函数接口
 
-`void logMedicineMessageWrite();`	写base文件
-
-`void logMedicineMessageRead();`	写list，读base文件
-
-`bool listSearch(const string & Name, const string & Num);`	匹配输入名+编号
-
-`int perPrice(const string & medicineName);`	用药名匹配价格
-
-`void modify();`	删改的接口
-
-`void intoStorageMedicineMessageWrite();`	入库写deal文件
-
-`void intoStorage();`	入库操作（写list，刷新base文件）
-
-`void outStockMedicineMessageWrite();`	销售写deal文件
-
-`void outStock();`	销售操作（写list，刷新base文件）
 

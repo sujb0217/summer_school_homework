@@ -14,6 +14,7 @@
 #include <fstream>
 #include <utility>
 #include <ctime>
+
 using namespace std;
 /*      Attention: "NOLINT" is used to prevent errors on CLion    */
 
@@ -118,7 +119,7 @@ public:
              << "========= 药品信息录入 =========" << endl;
         cout << "@@@ 若想退出录入请输入\'q\' @@@" << endl
              << endl;
-    L1:
+        L1:
         cout << "请输入药品编号：";
         cin >> message.number;
         if (message.number == "q")
@@ -183,7 +184,7 @@ public:
 
         ioMedicineList.push_back(message);
 
-        ofstream ofstr(fileBasePath, ios_base::app);
+        ofstream ofstr(fileBasePath, ios::app);
         ofstr << endl
               << message.number << endl
               << message.name << endl
@@ -220,6 +221,7 @@ public:
 
         return (res + tmp);
     }
+
     static int stringToInteger(const string &str)
     {
         int res = 0;
@@ -240,7 +242,7 @@ private:
         string intoStoragePerPrice;
         string intoStorageNum;
         string intoStoragePrice; // intoStoragePrice = intoStoragePerPrice * intoStorageNum
-        string intoStorageTime;
+        string intoStorageDate;
         string intoStoragePerson;
         string intoStorageType;
     };
@@ -252,7 +254,7 @@ public:
         cout << "========= 药品入库 =========" << endl;
         cout << "@@@ 若想要退出请输入\'q\' @@@" << endl
              << endl;
-    L1:
+        L1:
         cout << "请输入入库药品编号：";
         cin >> iSM.medicineNum;
         if (iSM.medicineNum == "q")
@@ -303,8 +305,8 @@ public:
         string dt = ctime(&now);
         cout << "时间（UTC + 800）：" << dt << endl;
         cout << "请输入药品入库日期：";
-        cin >> iSM.intoStorageTime;
-        if (iSM.intoStorageTime == "q")
+        cin >> iSM.intoStorageDate;
+        if (iSM.intoStorageDate == "q")
         {
             return false;
         }
@@ -335,14 +337,14 @@ public:
 
         // Write into file
 
-        ofstream ofstr(fileDealPath, ios_base::app);
+        ofstream ofstr(fileDealPath, ios::app);
         ofstr << endl
               << iSM.medicineName << endl
               << iSM.medicineNum << endl
               << iSM.intoStoragePerPrice << endl
               << iSM.intoStorageNum << endl
               << iSM.intoStoragePrice << endl
-              << iSM.intoStorageTime
+              << iSM.intoStorageDate
               << iSM.intoStoragePerson << endl
               << iSM.intoStorageType;
 
@@ -364,7 +366,7 @@ private:
         string outStockPerPrice;
         string outStockNum;
         string outStockPrice; // outStockPrice = outStockPerPrice * outStockNum
-        string outStockTime;
+        string outStockDate;
         string buyer;
         string outStockType;
     };
@@ -375,7 +377,7 @@ public:
         outStockMessage oSM;
         cout << "========= 药品销售 =========" << endl;
         cout << "@@@ 如果想要退出输入，请输入\'q\' @@@" << endl;
-    L2:
+        L2:
         cout << "请输入销售药品编号：";
         cin >> oSM.medicineNum;
         if (oSM.medicineNum == "q")
@@ -411,8 +413,7 @@ public:
         {
             cout << "库存不足，请重新输入" << endl;
             goto L2;
-        }
-        else
+        } else
         {
 
             cout << "销售药品编号：" << oSM.medicineNum << endl;
@@ -440,8 +441,8 @@ public:
             string dt = ctime(&now);
             cout << "时间（UTC + 800）：" << dt << endl;
             cout << "请输入药品交易日期：";
-            cin >> oSM.outStockTime;
-            if (oSM.outStockTime == "q")
+            cin >> oSM.outStockDate;
+            if (oSM.outStockDate == "q")
             {
                 return false;
             }
@@ -457,14 +458,14 @@ public:
             cout << "交易类型："
                  << "销售" << endl;
 
-            ofstream ofstr(fileDealPath, ios_base::app);
+            ofstream ofstr(fileDealPath, ios::app);
             ofstr << endl
                   << oSM.medicineName << endl
                   << oSM.medicineNum << endl
                   << oSM.outStockPerPrice << endl
                   << oSM.outStockNum << endl
                   << oSM.outStockPrice << endl
-                  << oSM.outStockTime
+                  << oSM.outStockDate
                   << oSM.buyer << endl
                   << oSM.outStockType;
 
@@ -476,26 +477,26 @@ public:
     // Func.5 Modify or delete the basic information of medicine
     bool modify()
     {
-        Medicine medicine;
+        // Medicine medicine;
         // species, manufacture, price, intdate, attentionMatters can be modified
         // medicineNum, medicineName, medicineStock can not be modified!
         // And the medicine information can not be modified if the medicine have been dealt!
 
-    L0:
+        L0:
         cout << "---------- 修改药品基本信息 ----------" << endl
              << endl;
         cout << "请选择想要进行的操作（修改信息/删除信息）" << endl;
         cout << "     *1 修改药品信息" << endl;
         cout << "     *2 删除药品信息" << endl;
         cout << endl
-             << "请输入想要进行的操作（1 / 2）如果想退出请输入\'q\'" << endl;
+             << "请输入想要进行的操作（1/2）如果想退出请输入\'q\'" << endl;
         char ops;
         cin >> ops;
         if (ops == '1')
         {
-        // Modify
-        L1:
-            cout << "请输入您想要修改信息的药品编号：" << endl;
+            // Modify
+            L1:
+            cout << "请输入您想要修改信息的药品编号：";
             string medicineNumber;
             cin >> medicineNumber;
             bool flag = true;
@@ -510,26 +511,26 @@ public:
             if (flag)
             {
                 cout << "未找到此药品信息，请检查输入" << endl;
+                sleep(1);
                 goto L1;
-            }
-            else
+            } else
             {
                 cout << endl
-                     << "请选择您想要修改的药品信息：" << endl
-                     << endl;
+                     << "请选择您想要修改的药品信息：" << endl;
                 cout << "     *1 药品种类" << endl;
                 cout << "     *2 生产厂家" << endl;
                 cout << "     *3 药品价格" << endl;
                 cout << "     *4 有效日期" << endl;
-                cout << "     *5 注意事项" << endl;
-            L2:
-                cout << "请输入您想要修改的药品信息，如果想退出请输入\'q\'" << endl;
+                cout << "     *5 注意事项" << endl
+                     << endl;
+                L2:
+                cout << "请输入您想要修改的药品信息，如果想退出请输入\'q\'：";
                 char choice;
                 cin >> choice;
 
                 if (choice == '1')
                 {
-                    cout << "请输入您想修改成的药品种类：" << endl;
+                    cout << "请输入您想修改成的药品种类：";
                     string newMedicineSpecies;
                     cin >> newMedicineSpecies;
                     for (auto &item : ioMedicineList)
@@ -539,10 +540,9 @@ public:
                             item.species = newMedicineSpecies;
                         }
                     }
-                }
-                else if (choice == '2')
+                } else if (choice == '2')
                 {
-                    cout << "请输入您想修改成的药品生产厂家：" << endl;
+                    cout << "请输入您想修改成的药品生产厂家：";
                     string newMedicineManufacture;
                     cin >> newMedicineManufacture;
                     for (auto &item : ioMedicineList)
@@ -552,10 +552,9 @@ public:
                             item.manufacture = newMedicineManufacture;
                         }
                     }
-                }
-                else if (choice == '3')
+                } else if (choice == '3')
                 {
-                    cout << "请输入您想修改成的药品价格：" << endl;
+                    cout << "请输入您想修改成的药品价格：";
                     string newMedicinePrice;
                     cin >> newMedicinePrice;
                     for (auto &item : ioMedicineList)
@@ -565,10 +564,9 @@ public:
                             item.price = newMedicinePrice;
                         }
                     }
-                }
-                else if (choice == '4')
+                } else if (choice == '4')
                 {
-                    cout << "请输入您想修改成的药品有效日期：" << endl;
+                    cout << "请输入您想修改成的药品有效日期：";
                     string newMedicineIndate;
                     cin >> newMedicineIndate;
                     for (auto &item : ioMedicineList)
@@ -578,10 +576,9 @@ public:
                             item.indate = newMedicineIndate;
                         }
                     }
-                }
-                else if (choice == '5')
+                } else if (choice == '5')
                 {
-                    cout << "请输入您想修改成的注意事项：" << endl;
+                    cout << "请输入您想修改成的注意事项：";
                     string newMedicineAttentions;
                     cin >> newMedicineAttentions;
                     for (auto &item : ioMedicineList)
@@ -591,14 +588,12 @@ public:
                             item.attentionMatters = newMedicineAttentions;
                         }
                     }
-                }
-                else if (choice == 'q')
+                } else if (choice == 'q')
                 {
                     cout << "** 正在退出 **" << endl;
                     sleep(1);
                     goto L0;
-                }
-                else
+                } else
                 {
                     cout << "输入有误，请检查输入" << endl;
                     goto L2;
@@ -622,16 +617,23 @@ public:
 
             ofstr.close();
             cout << "药品信息修改完成！" << endl;
-        }
-
-        else if (ops == '2')
+            sleep(1);
+            system("clear");
+        } else if (ops == '2')
         {
-        // TODO: Delete!
-        L3:
-            cout << "请输入您想要删除药品的编号：";
+            // TODO: Delete!
+            L3:
+            cout << "请输入您想要删除药品的编号，如果想要退出请输入\'q\'：";
             bool flag = true;
             string medicineNumber;
             cin >> medicineNumber;
+
+            if (medicineNumber == "q")
+            {
+                cout << endl;
+                sleep(1);
+                goto L0;
+            }
 
             // Check whether the medicineNumber has been entered
             for (auto &item : ioMedicineList)
@@ -658,10 +660,10 @@ public:
             // If flag is true, either the medicine has not been entered or has been dealt
             if (flag)
             {
-                cout << "未找到药品信息或药品存在交易记录无法删除，请检查输入" << endl;
+                cout << "未找到药品信息或药品存在交易记录无法删除，请检查输入！" << endl;
+                sleep(1);
                 goto L3;
-            }
-            else
+            } else
             {
                 auto itr = ioMedicineList.begin();
                 while (itr->number != medicineNumber)
@@ -688,9 +690,10 @@ public:
 
                 ofstr.close();
                 cout << "药品删除完成！" << endl;
+                sleep(1);
+                system("clear");
             }
-        }
-        else if (ops == 'q')
+        } else if (ops == 'q')
         {
             cout << "* 正在更新修改" << endl;
             sleep(1);
@@ -739,6 +742,228 @@ public:
             }
         }
     }
+
+    // Func.7 Check
+    bool queryManagement()
+    {
+        cout << "========= 查询管理 =========" << endl << endl;
+        L0:
+        cout << "请输入您想要查询的信息类型（1/2），如果想退出请输入\'q\'" << endl;
+        cout << "      1* 药品基本信息" << endl;
+        cout << "      2* 药品交易信息" << endl;
+        char ops;
+        cin >> ops;
+        switch (ops)
+        {
+            case '1':
+            {
+                // Case.1 check the basic information
+                // Users can use Name, Species, Manufacture, Indate to check medicine
+                cout << "请输入想要查询药品的基本信息（如果期望中不包含此项请输入\"-1\"，如果想退出请输入\'q\'）：" << endl;
+                // unordered_map<string, bool>
+                cout << "药品名称：";
+                bool ifName = true;
+                string medicineName;
+                cin >> medicineName;
+                if (medicineName == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineName == "-1")
+                {
+                    ifName = false;
+                }
+                cout << endl << "药品种类：";
+                bool ifSpecies = true;
+                string medicineSpecies;
+                cin >> medicineSpecies;
+                if (medicineSpecies == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineSpecies == "-1")
+                {
+                    ifSpecies = false;
+                }
+                cout << endl << "生产厂家：";
+                bool ifManufacture = true;
+                string medicineManufacture;
+                cin >> medicineManufacture;
+                if (medicineManufacture == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineManufacture == "-1")
+                {
+                    ifManufacture = false;
+                }
+                cout << endl << "有效日期：";
+                bool ifInDate = true;
+                string medicineIndate;
+                cin >> medicineIndate;
+                if (medicineIndate == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineIndate == "-1")
+                {
+                    ifInDate = false;
+                }
+                cout << endl;
+                progressBar();
+                if (!ifName && !ifSpecies && !ifManufacture && !ifInDate)
+                {
+                    cout << "输入有误，请检查输入" << endl;
+                    sleep(1);
+                    goto L0;
+                }
+                // Output search result
+                bool flag = true;
+                cout << "%%%%%%%%% 查询结果 %%%%%%%%%" << endl << endl;
+                for (auto &item : ioMedicineList)
+                {
+                    // Only two conditions the program will output result
+                    // Case.1 We input a key && have a key = inputKey
+                    // Case.2 We do not input a key (-1)
+                    if (((ifName && item.name == medicineName) || !ifName) &&
+                        ((ifSpecies && item.species == medicineSpecies) || !ifSpecies) &&
+                        ((ifManufacture && item.manufacture == medicineManufacture) || !ifManufacture) &&
+                        ((ifInDate && item.indate == medicineIndate) || !ifInDate))
+                    {
+                        cout << "药品编号：  " << item.number << endl;
+                        cout << "药品名称：  " << item.name << endl;
+                        cout << "药品种类：  " << item.species << endl;
+                        cout << "生产厂家：  " << item.manufacture << endl;
+                        cout << "药品价格：  " << item.price << endl;
+                        cout << "有效日期：  " << item.indate << endl;
+                        cout << "药品库存：  " << item.stock << endl;
+                        cout << endl;
+                        flag = false;
+                    } else
+                    {
+                        continue;
+                    }
+                }
+                if (flag)
+                {
+                    cout << "未查询到相关药品信息" << endl;
+                    sleep(1);
+                    goto L0;
+                }
+                break;
+            }
+            case '2':
+            {
+                // Case.2 check the trade information
+                // Users can use Name, Date, Type to check medicine
+                readDealFile(); // medicineTradeList
+                cout << "请输入想要查询药品的交易信息（如果期望中不包含此项请输入\"-1\"，如果想退出请输入\'q\'）：" << endl;
+                cout << "药品名称：";
+                bool ifName = true;
+                string medicineName;
+                cin >> medicineName;
+                if (medicineName == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineName == "-1")
+                {
+                    ifName = false;
+                }
+                cout << endl << "交易日期：";
+                bool ifDate = true;
+                string medicineTradeDate;
+                cin >> medicineTradeDate;
+                if (medicineTradeDate == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineTradeDate == "-1")
+                {
+                    ifDate = false;
+                }
+                cout << endl << "交易类型：";
+                bool ifTradeType = true;
+                string medicineTradeType;
+                cin >> medicineTradeType;
+                if (medicineTradeType == "q")
+                {
+                    cout << "* 正在退出" << endl;
+                    sleep(1);
+                    goto L0;
+                } else if (medicineTradeType == "-1")
+                {
+                    ifTradeType = false;
+                }
+                cout << endl;
+                progressBar();
+
+                // TODO:逻辑匹配 Logic Match
+            }
+            case 'q':
+            {
+                cout << "查询管理结束" << endl;
+                return false;
+            }
+            default:
+                break;
+        }
+
+        return true;
+    }
+    // Func.8
+    // Func.9
+
+private:
+    struct tradeMember
+    {
+        string medicineName;
+        string medicineNumber;
+        string medicinePerPrice;
+        string medicineTotalNum;
+        string medicineTotalPrice;
+        string medicineTradeDate;
+        string medicineTradePerson;
+        string medicineTradeType;
+    };
+    list<tradeMember> medicineTradeList;
+
+public:
+    void readDealFile()
+    {
+        ifstream ifstr(fileDealPath, ios::in);
+        char ch[30];
+        ifstr.getline(ch, sizeof(ch));
+
+        tradeMember tMem;
+        while (!ifstr.eof())
+        {
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineName = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineNumber = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicinePerPrice = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineTotalNum = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineTotalPrice = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineTradePerson = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineTradeDate = ch;
+            ifstr.getline(ch, sizeof(ch));
+            tMem.medicineTradeType = ch;
+
+            medicineTradeList.push_back(tMem);
+        }
+    }
 };
 
 // Set and reset the password
@@ -754,8 +979,7 @@ void login()
         cout << "请为系统设置密码：";
         cin >> password;
         pwd = true;
-    }
-    else
+    } else
     {
         // The password has been set
         cout << endl
@@ -766,69 +990,67 @@ void login()
         getchar();      // Get the input '\n'
         switch (ch)
         {
-        case 'l':
-        {
-        L1:
-            cout << "请输入密码：";
-            string tmp;
-            cin >> tmp;
-            if (tmp == password)
+            case 'l':
             {
-                cout << endl;
-                progressBar();
-                cout << endl;
-                sleep(1);
-                cout << endl;
-                cout << "@@@@@@@@ 欢 迎 使 用 @@@@@@@@" << endl
-                     << endl;
-                flag = false;
-                sleep(1);
-                system("clear");
-                //system("cls");
+                L1:
+                cout << "请输入密码：";
+                string tmp;
+                cin >> tmp;
+                if (tmp == password)
+                {
+                    cout << endl;
+                    progressBar();
+                    cout << endl;
+                    sleep(1);
+                    cout << endl;
+                    cout << "@@@@@@@@ 欢 迎 使 用 @@@@@@@@" << endl
+                         << endl;
+                    flag = false;
+                    sleep(1);
+                    system("clear");
+                    //system("cls");
+                } else
+                {
+                    sleep(1);
+                    cout << "您输入的密码不匹配，请重新输入！" << endl
+                         << endl;
+                    goto L1;
+                }
+                break;
             }
-            else
+            case 'r':
             {
-                sleep(1);
-                cout << "您输入的密码不匹配，请重新输入！" << endl
-                     << endl;
-                goto L1;
+                L2:
+                cout << "请输入root密码：";
+                string tmp;
+                cin >> tmp;
+                if (tmp == root)
+                {
+                    sleep(1);
+                    cout << "========== Admin ==========" << endl;
+                    sleep(1);
+                    cout << "尊敬的管理员欢迎您！" << endl;
+                    sleep(1);
+                    cout << "请输入您想重设的密码：" << endl;
+                    cin >> password;
+                    pwd = true;
+                    flag = false;
+                    progressBar();
+                    sleep(1);
+                    cout << endl
+                         << "密码已经重新设置！" << endl
+                         << endl;
+                    system("clear");
+                } else
+                {
+                    cout << "密码错误！若想重设密码请联系管理员" << endl;
+                    goto L2;
+                }
+                break;
             }
-            break;
-        }
-        case 'r':
-        {
-        L2:
-            cout << "请输入root密码：";
-            string tmp;
-            cin >> tmp;
-            if (tmp == root)
-            {
-                sleep(1);
-                cout << "======= Admin =======" << endl;
-                sleep(1);
-                cout << "尊敬的管理员欢迎您！" << endl;
-                sleep(1);
-                cout << "请输入您想重设的密码：" << endl;
-                cin >> password;
-                pwd = true;
-                flag = false;
-                progressBar();
-                sleep(1);
-                cout << endl
-                     << "密码已经重新设置！" << endl
-                     << endl;
-                system("clear");
-            }
-            else
-            {
-                cout << "密码错误！若想重设密码请联系管理员" << endl;
-                goto L2;
-            }
-            break;
-        }
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }
@@ -839,7 +1061,7 @@ void Hint()
     time_t now = time(nullptr);
     string dt = ctime(&now);
 
-    cout << "========== 药品供销管理系统 ==========" << endl
+    cout << "========= 药品供销管理系统 =========" << endl
          << endl;
     cout << "      -----    欢迎使用！   -----    " << endl;
     cout << "       " << dt << endl
@@ -883,8 +1105,7 @@ int main()
         {
             login();
         }
-    }
-    else
+    } else
     {
         cout << "请先选1登录系统：";
         char ch;
@@ -912,107 +1133,112 @@ int main()
             ch = getchar(); /* NOLINT */
             switch (ch)
             {
-            case '1':
-            {
-                flag = true;
-            L3:
-                cout << "请输入root密码：";
-                string tmp;
-                cin >> tmp;
-                if (tmp == root)
+                case '1':
                 {
-                    sleep(1);
-                    cout << "======= Admin =======" << endl;
-                    sleep(1);
-                    cout << "尊敬的管理员欢迎您！" << endl;
-                    sleep(1);
-                    cout << "请输入您想重设的密码：" << endl;
-                    cin >> password;
-                    pwd = true;
-                    flag = false;
-                    cout << endl;
-                    progressBar();
-                    sleep(1);
-                    cout << endl
-                         << "密码已经重新设置！" << endl
-                         << endl;
+                    flag = true;
+                    L3:
+                    cout << "请输入root密码：";
+                    string tmp;
+                    cin >> tmp;
+                    if (tmp == root)
+                    {
+                        sleep(1);
+                        cout << "========== Admin ==========" << endl;
+                        sleep(1);
+                        cout << "尊敬的管理员欢迎您！" << endl;
+                        sleep(1);
+                        cout << "请输入您想重设的密码：" << endl;
+                        cin >> password;
+                        pwd = true;
+                        flag = false;
+                        cout << endl;
+                        progressBar();
+                        sleep(1);
+                        cout << endl
+                             << "密码已经重新设置！" << endl
+                             << endl;
 
-                    system("clear");
-                    //system("cls");
+                        system("clear");
+                        //system("cls");
+                    } else
+                    {
+                        cout << "root密码错误，若想重设密码请联系管理员" << endl;
+                        goto L3;
+                    }
+                    break;
                 }
-                else
+                case '2':
                 {
-                    cout << "root密码错误，若想重设密码请联系管理员" << endl;
-                    goto L3;
-                }
-                break;
-            }
-            case '2':
-            {
-                {
-                    while (medicine.logMedicineMessage())
-                        ;
+                    while (medicine.logMedicineMessage());
                     cout << "药品信息录入完成" << endl;
                     sleep(1);
                     cout << "谢谢使用！" << endl;
+                    sleep(1);
+                    system("clear");
                     break;
                 }
-            }
-            case '3':
-            {
+                case '3':
                 {
-                    while (medicine.intoStorageMedicine())
-                        ;
+                    while (medicine.intoStorageMedicine());
                     cout << "药品入库完成" << endl;
                     sleep(1);
                     cout << "谢谢使用！" << endl;
+                    sleep(1);
+                    system("clear");
                     break;
                 }
-            }
-            case '4':
-            {
+                case '4':
                 {
-                    while (medicine.outStockMedicine())
-                        ;
+                    while (medicine.outStockMedicine());
                     cout << "药品出库完成" << endl;
                     sleep(1);
                     cout << "谢谢使用！" << endl;
+                    sleep(1);
+                    system("clear");
                     break;
                 }
-            }
-            case '5':
-                while (medicine.modify())
-                    ;
-                break;
-            case '6':
-            {
-                medicine.outputAllMessages();
-                sleep(3);
-                cout << endl
-                     << "输入\'q\'继续" << endl;
-                char q;
-            L4:
-                cin.get(q);
-                if (q == 'q')
+                case '5':
                 {
+                    while (medicine.modify());
+                    system("clear");
                     break;
                 }
-                else
+                case '6':
                 {
-                    goto L4;
+                    medicine.outputAllMessages();
+                    sleep(3);
+                    cout << endl
+                         << "输入\'q\'继续" << endl;
+                    char q;
+                    L4:
+                    cin.get(q);
+                    if (q == 'q')
+                    {
+                        break;
+                    } else
+                    {
+                        goto L4;
+                    }
                 }
-            }
-            case '7':
-            case '8':
-            case '9':
-            case 'q':
-                cout << endl
-                     << "感谢您的使用，再会👋" << endl
-                     << endl;
-                cout << "============== E O F ==============" << endl;
-                return 0;
-            default:
-                break;
+                case '7':
+                {
+                    while (medicine.queryManagement());
+                    cout << "谢谢使用" << endl;
+                    sleep(1);
+                    break;
+                }
+                case '8':
+                case '9':
+                case 'q':
+                {
+                    cout << endl
+                         << "感谢您的使用，再会👋" << endl
+                         << endl;
+                    cout << "============== E O F ==============" << endl;
+                    return 0;
+                }
+                default:
+                    break;
             }
         }
     }
