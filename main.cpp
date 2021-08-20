@@ -10,7 +10,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <vector>
 #include <list>
+#include <map>
 #include <unordered_map>
 #include <unistd.h>
 #include <utility>
@@ -202,39 +206,6 @@ public:
         return true;
     }
 
-    //    static double stringToDouble(const string &str)
-    //    {
-    //        double res = 0;
-    //        int size = str.size();
-    //        int i = 0;
-    //        while (str[i] != '.' && i < size)
-    //        {
-    //            res = res * 10 + str[i] - '0';
-    //            ++i;
-    //        }
-    //        // if(i < size) str[i] = '.'
-    //        double tmp = 0;
-    //        if (i < size)
-    //        {
-    //            for (int j = size - 1; j > i; --j)
-    //            {
-    //                tmp = (tmp + static_cast<double>(str[j] - '0')) / 10;
-    //            }
-    //        }
-    //
-    //        return (res + tmp);
-    //    }
-
-    //    static int stringToInteger(const string &str)
-    //    {
-    //        int res = 0;
-    //        int size = str.size();
-    //        for (int i = 0; i < size; ++i)
-    //        {
-    //            res = res * 10 + (str[i] - '0');
-    //        }
-    //        return res;
-    //    }
 
 private:
     string fileDealPath = "medicine_deal.dat";
@@ -765,12 +736,12 @@ public:
         //TODO: Find method to beautify the form!
         cout << "---------- 药品交易信息 ----------" << endl
              << endl;
-        cout << "    药品名称          药品编号      交易单价    交易数量    交易金额        交易时间      交易人员      交易方式" << endl
+        cout << "    药品名称          药品编号      交易单价    交易数量      交易金额        交易时间      交易人员        交易方式" << endl
              << endl;
         readDealFile();
         for (auto &item : medicineTradeList)
         {
-            cout << setiosflags(ios::left) << setw(28) << item.medicineName << resetiosflags(ios::left);
+            cout << setiosflags(ios::left) << setw(28) << item.medicineName << resetiosflags(ios::right);
             cout << setiosflags(ios::left) << setw(14) << item.medicineNumber << resetiosflags(ios::left);
             cout << setiosflags(ios::left) << setw(12) << item.medicinePerPrice << resetiosflags(ios::left);
             cout << setiosflags(ios::left) << setw(10) << item.medicineTotalNum << resetiosflags(ios::left);
@@ -1231,26 +1202,259 @@ public:
         return true;
     }
 
+    // Convert yyyy/mm/dd to yyyy/mm
+    string Convert(string &str)
+    {
+        string year, month;
+        int i = 0;
+        for (unsigned i = 0; i < str.size(); ++i)
+        {
+            if (!isdigit(str[i]))
+            {
+                str[i] = ' ';
+            }
+        }
+        stringstream ss(str);
+        ss >> year;
+        ss >> month;
+        return (year + "/" + month);
+    }
+
+
     // Func.9
     bool reportSummary()
     {
-        // unordered_map<month, unordered_map<medicineName, medicineSales>>
-        unordered_map<int, unordered_map<string, int>> medicineMap;
-        readDealFile(); // medicineTradeList
-        for (auto &item : medicineTradeList)
+        // map<year/month, map<medicineNum, tradeMember>>
+        map<string, map<string, vector<tradeMember>>, greater<string>> medicineMap;
+        vector<medicineMessage> medVtr;
+        cout << "---------- 汇总报表 ----------" << endl;
+        L0:
+        cout << "请输入想要汇总的药品信息编号（如果想退出请输入\'q\'）：" << endl;
+        cout << "    *1 药品名称" << endl;
+        cout << "    *2 药品种类" << endl;
+        cout << "    *3 生产厂家" << endl;
+        char ops;
+        cin >> ops;
+        string medicineName;
+        string medicineSpecies;
+        string medicineManufacture;
+        switch (ops)
         {
-            if (item.medicineTradeType == "销售")
+            case 'q':
             {
-                int month = (item.medicineTradeDate[5] - '0') * 10 + (item.medicineTradeDate[6] - '0');
-                string name = item.medicineName;
-                int sales = stoi(item.medicineTotalNum);
-                medicineMap[month][name] += sales;
-            } else
+                cout << "* 正在退出" << endl;
+                sleep(1);
+                return false;
+            }
+            case '1':
             {
-                continue;
+                cout << "请输入药品名称：";
+                cin >> medicineName;
+                break;
+            }
+            case '2':
+            {
+                cout << "请输入药品种类：";
+                cin >> medicineSpecies;
+                break;
+            }
+            case '3':
+            {
+                cout << "请输入生产厂家：";
+                cin >> medicineManufacture;
+                break;
+            }
+            default:
+                break;
+        }
+        for (auto &item : ioMedicineList)
+        {
+            if (ops == '1')
+            {
+                if (item.name == medicineName)
+                {
+                    medVtr.push_back(item);
+                }
+            } else if (ops == '2')
+            {
+                if (item.species == medicineSpecies)
+                {
+                    medVtr.push_back(item);
+                }
+            } else if (ops == '3')
+            {
+                if (item.manufacture == medicineManufacture)
+                {
+                    medVtr.push_back(item);
+                }
             }
         }
 
+        readDealFile(); // medicineTradeList
+        for (auto &item : medVtr)
+        {
+            for (auto itr : medicineTradeList)
+            {
+                if (item.number == itr.medicineNumber)
+                {
+                    medicineMap[Convert(itr.medicineTradeDate)][itr.medicineNumber].push_back(itr);
+                }
+            }
+        }
+        if (medVtr.empty())
+        {
+            cout << "No" << '\n';
+        }
+
+        if (medicineMap.empty())
+        {
+            cout << "未找到符合条件的药品，请检查输入" << endl;
+            goto L0;
+        }
+
+        cout << "%%%%%%%%%%%%%%%%%%% 查 询 结 果 %%%%%%%%%%%%%%%%%%%" << endl << endl;
+
+        for (auto &itr1 : medicineMap)
+        {
+
+            cout << endl;
+            for (int i = 0; i <= 41; ++i)
+            {
+                cout << ' ';
+            }
+            cout << left << setw(10) << itr1.first;
+            for (int i = 0; i <= 41; ++i)
+            {
+                cout << ' ';
+            }
+            cout << endl;
+
+            for (int i = 0; i < 100; ++i)
+            {
+                cout << '-';
+            }
+            cout << endl;
+            for (int i = 0; i <= 40; ++i)
+            {
+                cout << ' ';
+            }
+            cout << left << setw(12) << "药品基本信息";
+            for (int i = 0; i <= 40; ++i)
+            {
+                cout << ' ';
+            }
+            cout << endl;
+
+            for (int i = 0; i < 100; ++i)
+            {
+                cout << '-';
+            }
+            cout << endl;
+            cout << " 药品编号 " << '|';
+            cout << "   药品名称   " << '|';
+            cout << "      药品种类      " << '|';
+            cout << "      生产厂家      " << '|';
+            cout << " 药品价格 " << '|';
+            cout << "  有效日期  " << '|';
+            cout << "  注意事项  " << '|';
+            cout << " 药品库存 ";
+            cout << endl;
+
+            for (auto &itr2 : itr1.second)
+            {
+                medicineMessage msg;
+                for (auto &tmp : ioMedicineList)
+                {
+                    if (tmp.number == itr2.first)
+                    {
+                        msg = tmp;
+                    }
+                }
+                for (int i = 0; i < 100; ++i)
+                {
+                    cout << '-';
+                }
+                cout << endl;
+                cout << "  " << msg.number << " " << '|';
+                cout << " " << msg.name << " " << '|';
+                cout << " " << msg.species << " " << '|';
+                cout << " " << msg.manufacture << " " << '|';
+                cout << " " << msg.price << " " << '|';
+                cout << " " << msg.indate << " " << '|';
+                cout << " " << msg.attentionMatters << " " << '|';
+                cout << " " << msg.stock;
+                cout << endl;
+
+                for (int i = 0; i < 100; ++i)
+                {
+                    cout << '-';
+                }
+                cout << endl;
+                sort(itr2.second.begin(), itr2.second.end(), dateCompare);
+
+
+                cout << endl;
+                for (int i = 0; i <= 40; ++i)
+                {
+                    cout << ' ';
+                }
+                cout << left << setw(12) << "药品交易信息";
+                for (int i = 0; i <= 40; ++i)
+                {
+                    cout << ' ';
+                }
+                cout << endl;
+                for (int i = 0; i < 100; ++i)
+                {
+                    cout << '-';
+                }
+                cout << endl;
+                cout << "      交易数量     " << '|';
+                cout << "          交易金额           " << '|';
+                cout << "         交易时间         " << '|';
+                cout << "        交易方式        ";
+                cout << endl;
+                for (int i = 0; i < 100; ++i)
+                {
+                    cout << '-';
+                }
+                cout << endl;
+
+                int totalSales = 0;
+                for (auto &itr3 : itr2.second)
+                {
+                    cout << "        " << itr3.medicineTotalNum << "        " << '|';
+                    cout << "        " << itr3.medicineTotalPrice << "        " << '|';
+                    cout << "        " << itr3.medicineTradeDate << "        " << '|';
+                    cout << "        " << itr3.medicineTradeType;
+                    cout << endl;
+                    for (int i = 0; i < 100; ++i)
+                    {
+                        cout << '-';
+                    }
+                    cout << endl;
+                    if (itr3.medicineTradeType == "销售")
+                    {
+                        totalSales += stoi(itr3.medicineTotalNum);
+                    }
+                }
+
+                cout << "   " << "月销量：   ";
+                cout << totalSales;
+                cout << " （件）";
+                cout << endl;
+                for (int i = 0; i < 100; ++i)
+                {
+                    cout << '-';
+                }
+                cout << endl;
+
+            }
+
+            cout << endl;
+        }
+
+        return true;
     }
 
 private:
@@ -1267,6 +1471,13 @@ private:
     };
     list<tradeMember> medicineTradeList;
 
+    // Compare function
+    static bool dateCompare(const tradeMember &trM1, const tradeMember &trM2)
+    {
+        // Descending sort
+        return (trM1.medicineTradeDate > trM2.medicineTradeDate);
+    }
+
 public:
     void readDealFile()
     {
@@ -1274,6 +1485,7 @@ public:
         char ch[200];
         tradeMember tMem;
 
+        medicineTradeList.clear();
         ifstr.getline(ch, sizeof(ch));
         while (!ifstr.eof())
         {
