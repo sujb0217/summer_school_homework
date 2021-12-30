@@ -5,6 +5,8 @@
         "iosfwd": "cpp",
         "istream": "cpp",
         "fstream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "filesystem": "cpp",
+        "unordered_map": "cpp"
     }
 }
